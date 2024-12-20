@@ -1,5 +1,7 @@
 package ie.eoinhasty.edumate.ui.authentication
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,38 +13,85 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.google.firebase.firestore.FirebaseFirestore
+import ie.eoinhasty.edumate.data.database.UserRepository
+import ie.eoinhasty.edumate.data.users.UserDao
+import ie.eoinhasty.edumate.ui.navigation.Screen
 import ie.eoinhasty.edumate.ui.theme.EduMateTheme
+import kotlin.math.log
 
+/**
+ * LoginScreen.kt
+ * This file contains the implementation of the LoginScreen Composable, which provides the user interface
+ * for logging into the EduMate application.
+ *
+ * Features:
+ * - Email and password input fields for user credentials.
+ * - Login functionality with success and error handling.
+ * - Navigation to the registration screen for new users.
+ *
+ * Dependencies:
+ * - Firebase for user authentication.
+ * - ViewModel for managing login state.
+ *
+ * Author: [Eoin Hasty]
+ * Date: [16/12/2024]
+ */
+
+/**
+ * Composable function for rendering the LoginScreen UI.
+ *
+ * @param navController The NavHostController to handle navigation.
+ * @param viewModel The LoginViewModel for managing login state.
+ * @param onLoginSuccess A callback triggered when the login is successful.
+ */
 @Composable
 fun LoginScreen(
+    navController: NavHostController,
+    viewModel: LoginViewModel,
+    onLoginSuccess: () -> Unit
 ) {
-    LoginScreenContent()
-}
+    val context = LocalContext.current
+    val loginState by viewModel.loginState.collectAsState()
 
-@Composable
-private fun LoginScreenContent() {
+    // Navigate to MyStudyGroupsScreen when login is successful
+    LaunchedEffect(loginState) {
+        if(loginState is LoginState.Success) {
+            onLoginSuccess()
+            viewModel.resetState()
+            Log.d("LoginScreen", "Navigating to MyStudyGroupsScreen")
+        }
+    }
 
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // LoginScreen UI
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -65,17 +114,17 @@ private fun LoginScreenContent() {
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Username Input
+            // Email Input
             Text(
-                text = "Username:",
+                text = "Email:",
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.align(Alignment.Start),
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(8.dp))
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
+                value = email,
+                onValueChange = { email = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
@@ -85,7 +134,7 @@ private fun LoginScreenContent() {
                 ),
                 label = {
                     Text(
-                        text = "Enter Usernames",
+                        text = "Enter Email",
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                     )
                 },
@@ -133,7 +182,18 @@ private fun LoginScreenContent() {
             // Login Button
             Button(
                 onClick = {
-                    // TODO Add Login Logic
+                    viewModel.login(
+                        email = email,
+                        password = password,
+                        onSuccess = {
+                            onLoginSuccess()
+                            viewModel.resetState()
+                        },
+                        onFailure = { message ->
+                            viewModel.resetState()
+                            Toast.makeText(context, "Error: $message", Toast.LENGTH_SHORT).show()
+                        }
+                    )
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 modifier = Modifier
@@ -150,10 +210,25 @@ private fun LoginScreenContent() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Loading Indicator and Error Handling
+            when (loginState) {
+                is LoginState.Loading -> {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+                is LoginState.Error -> {
+                    val message = (loginState as LoginState.Error).message
+                    Toast.makeText(context, "Error: $message", Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
+            }
+
             // Sign-Up Button
             OutlinedButton(
                 onClick = {
-                    // TODO Add Signup Logic
+                    navController.navigate(Screen.Register.route)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -168,21 +243,5 @@ private fun LoginScreenContent() {
                 )
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun LoginScreenDarkPreview() {
-    EduMateTheme(darkTheme = true, dynamicColor = false) {
-        LoginScreen()
-    }
-}
-
-@Preview
-@Composable
-fun LoginScreenLightPreview() {
-    EduMateTheme(darkTheme = false, dynamicColor = false) {
-        LoginScreen()
     }
 }

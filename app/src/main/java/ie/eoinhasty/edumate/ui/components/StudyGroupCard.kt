@@ -1,5 +1,18 @@
 package ie.eoinhasty.edumate.ui.components
 
+/**
+ * StudyGroupCard.kt
+ * This file defines a composable UI component for displaying a study group card.
+ *
+ * Features:
+ * - Displays study group details including name, number of members, and session details.
+ * - Indicates whether the group is for online or in-person sessions with an icon.
+ * - Includes an action button for joining, leaving, or viewing study groups.
+ *
+ * Author: [Eoin Hasty]
+ * Date: [20/12/2024]
+ */
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,29 +43,42 @@ import ie.eoinhasty.edumate.ui.theme.EduMateTheme
 import ie.eoinhasty.edumate.ui.theme.MossGreen
 import ie.eoinhasty.edumate.ui.theme.SkyBlue
 
+/**
+ * Displays a card with study group details and an action button.
+ *
+ * @param icon The icon representing the study group.
+ * @param isOnline Indicates if the study group is online.
+ * @param heading The main title of the study group (e.g., group name).
+ * @param subheading Additional details such as member count.
+ * @param buttonText The text displayed on the action button.
+ * @param buttonColor The background color of the action button.
+ * @param onButtonClick Callback for when the action button is clicked.
+ * @param onClick Callback for when the card itself is clicked.
+ */
 @Composable
 fun StudyGroupCard(
     icon: ImageVector,
     isOnline: Boolean,
     heading: String,
     subheading: String,
-    nextSession: String,
     buttonText: String,
     buttonColor: Color,
-    onButtonClick: () -> Unit
+    onButtonClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .height(100.dp),
+            .height(100.dp), // Fixed card height
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
         ),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
-        )
+        ),
+        onClick = onClick
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -60,6 +86,7 @@ fun StudyGroupCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
+            // Icon representing the study group
             Image(
                 imageVector = icon,
                 contentDescription = null,
@@ -68,6 +95,7 @@ fun StudyGroupCard(
                     .padding(end = 16.dp)
             )
 
+            // Text content: Heading and subheading
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -90,6 +118,7 @@ fun StudyGroupCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
+                // Icon and text for online/in-person indicator
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = if (isOnline) Icons.Filled.Computer else Icons.Filled.Place,
@@ -97,13 +126,14 @@ fun StudyGroupCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = nextSession,
+                        text = if (isOnline) "Online" else "In Person",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
 
+            // Action button
             Button(
                 onClick = onButtonClick,
                 colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
@@ -131,11 +161,11 @@ fun StudyGroupCardPreview() {
             icon = Icons.Filled.AccountTree,
             heading = "Data Structures & Algs",
             subheading = "8 Members | Next session:",
-            nextSession = "Thursday at 4 PM",
             buttonText = "Leave",
             buttonColor = MaterialTheme.colorScheme.error,
             onButtonClick = {},
-            isOnline = true
+            isOnline = true,
+            onClick = {}
         )
     }
 }
@@ -148,11 +178,11 @@ fun StudyGroupCardJoinedPreview() {
             icon = Icons.Filled.PhoneAndroid,
             heading = "Adv Mobile App & Design",
             subheading = "5 Members | Next session:",
-            nextSession = "Monday at 3 PM",
             buttonText = "Joined",
             buttonColor = SkyBlue,
             onButtonClick = {},
-            isOnline = false
+            isOnline = false,
+            onClick = {}
         )
     }
 }
@@ -165,11 +195,11 @@ fun StudyGroupCardJoinPreview() {
             icon = Icons.Filled.Settings,
             heading = "Machine Learning Basics",
             subheading = "6 Members | Next session:",
-            nextSession = "Friday at 2 PM",
             buttonText = "Join",
             buttonColor = MossGreen,
             onButtonClick = {},
-            isOnline = true
+            isOnline = true,
+            onClick = {}
         )
     }
 }
