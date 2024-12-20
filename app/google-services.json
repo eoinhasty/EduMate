@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "187502672353",
+    "project_id": "edumate-703ee",
+    "storage_bucket": "edumate-703ee.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:187502672353:android:b9c57eec3abd5c6591baa0",
+        "android_client_info": {
+          "package_name": "ie.eoinhasty.edumate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhoBFqkGF1aWHH01SxHgmjxyWZfDR1bJA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
